@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Menu, Moon, Search, Sun } from "lucide-react";
+import { memo } from "react";
 
 import { IconButton } from "@/components/ui/icon-button";
 
@@ -10,7 +11,7 @@ type TopNavbarProps = {
   onThemeToggle: () => void;
 };
 
-export function TopNavbar({
+export const TopNavbar = memo(function TopNavbar({
   isDarkMode,
   onMobileMenu,
   onThemeToggle
@@ -58,4 +59,4 @@ export function TopNavbar({
       </div>
     </header>
   );
-}
+});

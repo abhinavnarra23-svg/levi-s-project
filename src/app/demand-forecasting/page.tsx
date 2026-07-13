@@ -18,7 +18,7 @@ import {
   type LucideIcon
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -233,7 +233,7 @@ function CustomTooltip({
   );
 }
 
-function ForecastHero() {
+const ForecastHero = memo(function ForecastHero() {
   return (
     <motion.section
       className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/80"
@@ -254,7 +254,7 @@ function ForecastHero() {
       </div>
     </motion.section>
   );
-}
+});
 
 function ForecastValueLabel({
   dataKey,
@@ -1015,7 +1015,7 @@ export default function DemandForecastingPage() {
               color={colors.orange}
               data={forecastLineData}
               dataKey="forecastDemand"
-              formatter={(value) => formatNumber(value)}
+              formatter={formatNumber}
               title="Demand Forecast Trend"
               valueLabel="Forecast Demand"
             />

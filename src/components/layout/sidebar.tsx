@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { memo } from "react";
 
 import { IconButton } from "@/components/ui/icon-button";
 import { navigationItems } from "@/lib/navigation";
@@ -126,7 +127,7 @@ function SidebarContent({
   );
 }
 
-export function Sidebar({
+export const Sidebar = memo(function Sidebar({
   collapsed,
   mobileOpen,
   onCollapseToggle,
@@ -178,4 +179,4 @@ export function Sidebar({
       </AnimatePresence>
     </>
   );
-}
+});

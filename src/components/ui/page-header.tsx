@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { memo } from "react";
 
 type PageHeaderProps = {
   eyebrow: string;
@@ -8,7 +9,7 @@ type PageHeaderProps = {
   description: string;
 };
 
-export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
+export const PageHeader = memo(function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
   return (
     <motion.div
       className="space-y-3"
@@ -29,4 +30,4 @@ export function PageHeader({ eyebrow, title, description }: PageHeaderProps) {
       </div>
     </motion.div>
   );
-}
+});

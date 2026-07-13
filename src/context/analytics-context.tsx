@@ -2,12 +2,14 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode
 } from "react";
+import { usePathname } from "next/navigation";
 
 import { DataService } from "@/services/DataService";
 import { defaultFilters, FilterService } from "@/services/FilterService";
@@ -25,13 +27,17 @@ type AnalyticsContextValue = {
 };
 
 const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
+const analyticsRoutes = new Set(["/business-insights", "/inventory-analytics", "/sales-analytics"]);
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   useEffect(() => {
+    if (!analyticsRoutes.has(pathname)) return;
+
     let isMounted = true;
 
     DataService.loadAnalyticsData()
@@ -49,6 +55,13 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
+  }, [pathname]);
+
+  const resetFilters = useCallback(() => setFilters(defaultFilters), []);
+  const setFilter = useCallback((key: keyof FilterState, selectedValue: string) => {
+    setFilters((current) =>
+      current[key] === selectedValue ? current : { ...current, [key]: selectedValue }
+    );
   }, []);
 
   const filterOptions = useMemo(
@@ -69,11 +82,10 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
       filterOptions,
       filters,
       isLoading: !data && !error,
-      resetFilters: () => setFilters(defaultFilters),
-      setFilter: (key, selectedValue) =>
-        setFilters((current) => ({ ...current, [key]: selectedValue }))
+      resetFilters,
+      setFilter
     }),
-    [data, error, filteredRows, filterOptions, filters]
+    [data, error, filteredRows, filterOptions, filters, resetFilters, setFilter]
   );
 
   return <AnalyticsContext.Provider value={value}>{children}</AnalyticsContext.Provider>;

@@ -11,7 +11,7 @@ import {
   TrendingDown
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useMemo, useRef, type ReactNode } from "react";
+import { memo, useMemo, useRef, type ReactNode } from "react";
 import {
   Area,
   AreaChart,
@@ -205,7 +205,7 @@ function heatmapRevenueColor(value: number, maxValue: number) {
   return palette.softBlue;
 }
 
-function SalesPageHeader() {
+const SalesPageHeader = memo(function SalesPageHeader() {
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
@@ -226,7 +226,7 @@ function SalesPageHeader() {
       </div>
     </motion.div>
   );
-}
+});
 
 function SalesFilterPanel() {
   const { filterOptions, filters, resetFilters, setFilter } = useAnalytics();

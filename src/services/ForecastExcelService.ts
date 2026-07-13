@@ -1,7 +1,6 @@
-import * as XLSX from "xlsx";
-
 type ExcelCell = string | number | boolean | null | undefined;
 type ExcelRow = Record<string, ExcelCell>;
+type XlsxModule = typeof import("xlsx");
 
 export type ForecastExcelRow = {
   date: string;
@@ -33,6 +32,8 @@ const EXCEL_PATHS = {
   modelComparison: "/data/Model_Comparison.xlsx"
 };
 
+let cachedForecastData: Promise<ForecastExcelData> | null = null;
+
 function value(row: ExcelRow, keys: string[]) {
   const normalized = new Map(Object.entries(row).map(([key, item]) => [key.trim().toLowerCase(), item]));
   for (const key of keys) {
@@ -48,7 +49,7 @@ function toNumber(input: ExcelCell) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function toIsoDate(input: ExcelCell) {
+function toIsoDate(input: ExcelCell, XLSX: XlsxModule) {
   if (typeof input === "number") {
     const parsed = XLSX.SSF.parse_date_code(input);
     if (parsed) {
@@ -60,7 +61,7 @@ function toIsoDate(input: ExcelCell) {
   return String(input ?? "");
 }
 
-async function readWorkbookRows(path: string): Promise<ExcelRow[]> {
+async function readWorkbookRows(path: string, XLSX: XlsxModule): Promise<ExcelRow[]> {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(`Unable to load ${path}`);
@@ -117,9 +118,9 @@ async function readForecastCsvRows() {
   });
 }
 
-function mapForecastRow(row: ExcelRow): ForecastExcelRow {
+function mapForecastRow(row: ExcelRow, XLSX: XlsxModule): ForecastExcelRow {
   return {
-    date: toIsoDate(value(row, ["Date"])),
+    date: toIsoDate(value(row, ["Date"]), XLSX),
     forecastedDemand: toNumber(value(row, ["Forecasted_Demand", "Forecasted Demand"])),
     forecastedSales: toNumber(value(row, ["Forecasted_Sales", "Forecasted Sales"]))
   };
@@ -136,16 +137,20 @@ function mapModelRow(row: ExcelRow): ForecastModelComparisonRow {
   };
 }
 
-export async function loadForecastExcelData(): Promise<ForecastExcelData> {
-  const [forecastRows, modelRows, forecastCsvResults] = await Promise.all([
-    readWorkbookRows(EXCEL_PATHS.forecastResults),
-    readWorkbookRows(EXCEL_PATHS.modelComparison),
-    readForecastCsvRows()
-  ]);
+export function loadForecastExcelData(): Promise<ForecastExcelData> {
+  cachedForecastData ??= import("xlsx").then(async (XLSX) => {
+    const [forecastRows, modelRows, forecastCsvResults] = await Promise.all([
+      readWorkbookRows(EXCEL_PATHS.forecastResults, XLSX),
+      readWorkbookRows(EXCEL_PATHS.modelComparison, XLSX),
+      readForecastCsvRows()
+    ]);
 
-  return {
-    forecastCsvResults: forecastCsvResults.filter((row) => row.date),
-    forecastResults: forecastRows.map(mapForecastRow).filter((row) => row.date),
-    modelComparison: modelRows.map(mapModelRow).filter((row) => row.model && row.forecast),
-  };
+    return {
+      forecastCsvResults: forecastCsvResults.filter((row) => row.date),
+      forecastResults: forecastRows.map((row) => mapForecastRow(row, XLSX)).filter((row) => row.date),
+      modelComparison: modelRows.map(mapModelRow).filter((row) => row.model && row.forecast),
+    };
+  });
+
+  return cachedForecastData;
 }

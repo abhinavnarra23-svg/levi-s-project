@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopNavbar } from "@/components/layout/top-navbar";
@@ -18,13 +18,18 @@ export function AppShell({ children }: AppShellProps) {
     document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
+  const toggleSidebar = useCallback(() => setIsSidebarCollapsed((value) => !value), []);
+  const closeMobileSidebar = useCallback(() => setIsMobileSidebarOpen(false), []);
+  const openMobileSidebar = useCallback(() => setIsMobileSidebarOpen(true), []);
+  const toggleTheme = useCallback(() => setIsDarkMode((value) => !value), []);
+
   return (
     <div className="min-h-screen bg-brand-canvas text-brand-ink transition-colors dark:bg-slate-950 dark:text-slate-100">
       <Sidebar
         collapsed={isSidebarCollapsed}
         mobileOpen={isMobileSidebarOpen}
-        onCollapseToggle={() => setIsSidebarCollapsed((value) => !value)}
-        onMobileClose={() => setIsMobileSidebarOpen(false)}
+        onCollapseToggle={toggleSidebar}
+        onMobileClose={closeMobileSidebar}
       />
       <div
         className="flex min-h-screen flex-col transition-[padding] duration-300 ease-out lg:pl-[280px] lg:data-[collapsed=true]:pl-[92px]"
@@ -32,8 +37,8 @@ export function AppShell({ children }: AppShellProps) {
       >
         <TopNavbar
           isDarkMode={isDarkMode}
-          onMobileMenu={() => setIsMobileSidebarOpen(true)}
-          onThemeToggle={() => setIsDarkMode((value) => !value)}
+          onMobileMenu={openMobileSidebar}
+          onThemeToggle={toggleTheme}
         />
         <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-[1440px]">{children}</div>

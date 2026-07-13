@@ -11,7 +11,7 @@ import {
   RotateCcw,
   TrendingDown
 } from "lucide-react";
-import { useMemo, useRef, type ReactNode } from "react";
+import { memo, useMemo, useRef, type ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -206,7 +206,7 @@ function applyInventoryFilters(rows: SalesInventoryRow[], filters: Record<Filter
   );
 }
 
-function InventoryPageHeader() {
+const InventoryPageHeader = memo(function InventoryPageHeader() {
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
@@ -227,7 +227,7 @@ function InventoryPageHeader() {
       </div>
     </motion.div>
   );
-}
+});
 
 function InventoryFilterPanel() {
   const { data, filters, resetFilters, setFilter } = useAnalytics();
