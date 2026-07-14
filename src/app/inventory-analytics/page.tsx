@@ -55,13 +55,13 @@ const axisStyle = {
 };
 
 const palette = {
-  blue: "#2563EB",
-  darkOrange: "#EA580C",
-  green: "#16A34A",
+  blue: "#669BBC",
+  darkOrange: "#780000",
+  green: "#003049",
   grey: "#94A3B8",
-  orange: "#F59E0B",
-  red: "#C41230",
-  yellow: "#EAB308"
+  orange: "#FDF0D5",
+  red: "#C1121F",
+  yellow: "#FDF0D5"
 };
 
 const ageingOrder = ["fast", "moderate", "slow", "dead"];
@@ -194,16 +194,32 @@ function sortSizes(data: InventoryDatum[]) {
   });
 }
 
-function averageAgeingFor(rows: SalesInventoryRow[], department: string, store: string) {
-  const matches = rows.filter((row) => row.department === department && row.storeName === store);
-  if (!matches.length) return 0;
-  return matches.reduce((total, row) => total + row.ageingDays, 0) / matches.length;
+function buildAverageAgeingIndex(rows: SalesInventoryRow[]) {
+  const totals = new Map<string, { count: number; total: number }>();
+
+  for (const row of rows) {
+    const key = `${row.department}\u0000${row.storeName}`;
+    const current = totals.get(key) ?? { count: 0, total: 0 };
+    current.count += 1;
+    current.total += row.ageingDays;
+    totals.set(key, current);
+  }
+
+  return new Map(
+    Array.from(totals, ([key, value]) => [key, value.count ? value.total / value.count : 0])
+  );
 }
 
 function applyInventoryFilters(rows: SalesInventoryRow[], filters: Record<FilterKey, string>) {
-  return rows.filter((row) =>
-    filterFields.every(([key]) => filters[key] === "All" || String(row[key]) === filters[key])
-  );
+  const activeKeys = filterFields.map(([key]) => key).filter((key) => filters[key] !== "All");
+  if (!activeKeys.length) return rows;
+
+  return rows.filter((row) => {
+    for (const key of activeKeys) {
+      if (String(row[key]) !== filters[key]) return false;
+    }
+    return true;
+  });
 }
 
 const InventoryPageHeader = memo(function InventoryPageHeader() {
@@ -312,7 +328,7 @@ function InventoryKpiCard({ kpi }: { kpi: KpiRecord }) {
   const trend = {
     danger: { className: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300", icon: ArrowDownRight },
     neutral: { className: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300", icon: Minus },
-    success: { className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300", icon: ArrowUpRight },
+    success: { className: "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue", icon: ArrowUpRight },
     warning: { className: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300", icon: TrendingDown }
   }[kpi.tone ?? "neutral"];
   const TrendIcon = trend.icon;
@@ -581,7 +597,7 @@ function HorizontalInventoryChart({
           <Bar animationDuration={700} dataKey="value" name="Inventory" radius={[0, 10, 10, 0]}>
             {visibleData.map((item, index) => (
               <Cell
-                fill={topThreeRed && index < 3 ? "#9F1028" : highlightTop && index === 0 ? palette.red : palette.blue}
+                fill={topThreeRed && index < 3 ? "#780000" : highlightTop && index === 0 ? palette.red : palette.blue}
                 key={`${item.name}-${index}`}
               />
             ))}
@@ -638,9 +654,10 @@ export default function InventoryAnalyticsPage() {
   const charts = useMemo(() => {
     const availability = enrichPercentages(buildInventoryStatusData(filteredRows));
     const ageingBuckets = enrichPercentages(buildAgeingData(filteredRows));
+    const averageAgeingIndex = buildAverageAgeingIndex(filteredRows);
     const heatmap = ChartService.heatmap(filteredRows, "department", "storeName", "stock").map((item) => ({
       ...item,
-      averageAgeing: averageAgeingFor(filteredRows, String(item.x), String(item.y)),
+      averageAgeing: averageAgeingIndex.get(`${String(item.x)}\u0000${String(item.y)}`) ?? 0,
       value: item.z
     }));
 

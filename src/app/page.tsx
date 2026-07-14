@@ -54,7 +54,7 @@ const objectives = [
   },
   {
     title: "Demand Forecasting",
-    description: "Forecast future sales and product demand using Machine Learning models.",
+    description: "Forecast future sales and demand with department, store and season-level analysis.",
     icon: LineChart
   }
 ];
@@ -102,7 +102,7 @@ const features = [
   {
     title: "Forecast Analytics",
     icon: LineChart,
-    items: ["Sales Forecast", "Demand Forecast", "Model Comparison", "Forecast Planning"]
+    items: ["Department forecasts", "All-store forecasts", "Season forecasts", "Model comparison"]
   },
   {
     title: "Relationship Analytics",
@@ -132,7 +132,7 @@ const intelligenceCards = [
   },
   {
     title: "Forecast Analytics",
-    copy: "Machine Learning based sales forecasting, demand prediction and inventory planning."
+    copy: "Machine Learning sales and demand forecasts analyzed across departments, all stores and seasons."
   }
 ];
 

@@ -28,7 +28,7 @@ const objectives = [
   "Identify fast-moving, slow-moving and dead-stock products.",
   "Analyze sales performance across stores, products, seasons and time periods.",
   "Examine the relationship between inventory ageing, stock availability and sales performance.",
-  "Forecast future sales and product demand using machine learning models."
+  "Forecast future sales and product demand with department, all-store and seasonal analysis using machine learning models."
 ];
 
 const technologyGroups = [
@@ -97,7 +97,7 @@ const modules = [
   },
   {
     icon: LineChart,
-    purpose: "Sales forecasting, demand forecasting, forecast comparison and machine learning prediction results.",
+    purpose: "Sales and demand forecasting across departments, all stores and seasons, with forecast comparison and model results.",
     title: "Forecast Analytics"
   },
   {
@@ -132,7 +132,7 @@ const highlights = [
   { description: "Interactive sales performance analysis across stores, products, seasons and time periods.", icon: BarChart3, title: "Sales Analytics" },
   { description: "Inventory availability, stock movement, ageing analysis and dead-stock identification.", icon: Boxes, title: "Inventory Analytics" },
   { description: "Relationship analysis between inventory ageing, stock availability, sales quantity and revenue.", icon: GitBranch, title: "Relationship Analytics" },
-  { description: "Sales and demand forecasting with model evaluation and forecast comparison.", icon: LineChart, title: "Forecast Analytics" },
+  { description: "Sales and demand forecasting across departments, all stores and seasons with model evaluation and forecast comparison.", icon: LineChart, title: "Forecast Analytics" },
   { description: "Machine learning prediction workflow using evaluated regression models.", icon: Sparkles, title: "Machine Learning Prediction" },
   { description: "Interactive dashboard experience for analyzing retail sales, inventory and forecasting outcomes.", icon: BrainCircuit, title: "Interactive Business Intelligence Dashboard" }
 ];
@@ -159,6 +159,7 @@ const achievements = [
   "Selected Random Forest as the best Sales Forecast model.",
   "Selected XGBoost as the best Demand Forecast model.",
   "Generated 12-month Sales and Demand forecasts.",
+  "Developed department-wise, all-store and season-wise forecast analysis.",
   "Integrated forecasting into an interactive business intelligence dashboard."
 ];
 

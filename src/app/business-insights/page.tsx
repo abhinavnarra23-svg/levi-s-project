@@ -28,13 +28,15 @@ import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
 import type { SalesInventoryRow } from "@/types/analytics";
 
 const COLORS = {
-  blue: "#2563EB",
-  green: "#16A34A",
+  blue: "#669BBC",
+  cream: "#FDF0D5",
+  darkRed: "#780000",
+  green: "#003049",
   grey: "#6B7280",
-  lightBlue: "#DBEAFE",
-  orange: "#F59E0B",
-  red: "#C41230",
-  slate: "#334155"
+  lightBlue: "#FDF0D5",
+  orange: "#FDF0D5",
+  red: "#C1121F",
+  slate: "#003049"
 };
 
 type NamedValue = {
@@ -286,8 +288,12 @@ function SalesAgeingTrendCard({ data }: { data: AgeingBucketDatum[] }) {
 function MovementContributionCard({ data }: { data: AgeingBucketDatum[] }) {
   const highestRevenueBucket = [...data].sort((a, b) => b.revenue - a.revenue)[0]?.bucket;
   const chartData = buildMovementContributionData(data);
+  const lastVisibleBucketIndex = data.reduce(
+    (lastIndex, item, index) => (item.revenue > 0 || item.inventory > 0 ? index : lastIndex),
+    -1
+  );
   const bucketColors: Record<string, string> = {
-    "Dead Stock": highestRevenueBucket === "Dead Stock" ? COLORS.red : "#EF4444",
+    "Dead Stock": highestRevenueBucket === "Dead Stock" ? COLORS.red : COLORS.darkRed,
     Fast: highestRevenueBucket === "Fast" ? COLORS.red : COLORS.green,
     Moderate: highestRevenueBucket === "Moderate" ? COLORS.red : COLORS.blue,
     Slow: highestRevenueBucket === "Slow" ? COLORS.red : COLORS.orange
@@ -307,8 +313,16 @@ function MovementContributionCard({ data }: { data: AgeingBucketDatum[] }) {
             <YAxis dataKey="name" tick={axisStyle} tickLine={false} type="category" width={86} />
             <Tooltip />
             <Legend wrapperStyle={{ color: "#000000", fontWeight: 500 }} />
-            {data.map((item) => (
-              <Bar dataKey={item.bucket} fill={bucketColors[item.bucket]} key={item.bucket} radius={[0, 10, 10, 0]} stackId="movement" />
+            {data.map((item, index) => (
+              <Bar
+                dataKey={item.bucket}
+                fill={bucketColors[item.bucket]}
+                key={item.bucket}
+                radius={index === lastVisibleBucketIndex ? [0, 10, 10, 0] : [0, 0, 0, 0]}
+                stackId="movement"
+                stroke={bucketColors[item.bucket] === COLORS.cream ? COLORS.darkRed : undefined}
+                strokeWidth={bucketColors[item.bucket] === COLORS.cream ? 1 : 0}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>

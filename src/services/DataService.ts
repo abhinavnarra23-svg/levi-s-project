@@ -45,7 +45,7 @@ function parseCsvLine(line: string) {
 
 function parseCsv(text: string): CsvRow[] {
   const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(Boolean);
-  const headers = parseCsvLine(lines[0]).map((header) => header.trim());
+  const headers = parseCsvLine(lines[0]).map((header) => normalizeKey(header.trim()));
 
   return lines.slice(1).map((line) => {
     const values = parseCsvLine(line);
@@ -66,13 +66,25 @@ function normalizeKey(value: string) {
 }
 
 function normalizedRow(row: CsvRow) {
-  return new Map(Object.entries(row).map(([key, value]) => [normalizeKey(key), value]));
+  const firstKey = Object.keys(row)[0];
+  if (!firstKey || firstKey === normalizeKey(firstKey)) return row;
+
+  return Object.entries(row).reduce<CsvRow>((normalized, [key, value]) => {
+    normalized[normalizeKey(key)] = value;
+    return normalized;
+  }, {});
 }
 
-function getValue(row: Map<string, string>, candidates: string[]) {
-  for (const candidate of candidates) {
-    const value = row.get(normalizeKey(candidate));
-    if (value !== undefined) return value;
+function getValue(row: CsvRow, first: string, second?: string, third?: string) {
+  const firstValue = row[normalizeKey(first)];
+  if (firstValue !== undefined) return firstValue;
+  if (second) {
+    const secondValue = row[normalizeKey(second)];
+    if (secondValue !== undefined) return secondValue;
+  }
+  if (third) {
+    const thirdValue = row[normalizeKey(third)];
+    if (thirdValue !== undefined) return thirdValue;
   }
   return "";
 }
@@ -95,52 +107,52 @@ async function fetchCsv(path: string) {
 function mapSalesInventory(row: CsvRow): SalesInventoryRow {
   const normalized = normalizedRow(row);
   return {
-    ageingCategory: getValue(normalized, ["Ageing Category"]),
-    ageingDays: toNumber(getValue(normalized, ["Ageing Days"])),
-    amount: toNumber(getValue(normalized, ["Amount", "Revenue", "Sales"])),
-    billDate: getValue(normalized, ["Bill Date", "Date"]),
-    day: getValue(normalized, ["Day"]),
-    department: getValue(normalized, ["Department", "Product Name.1"]),
-    month: getValue(normalized, ["Month"]),
-    monthNumber: toNumber(getValue(normalized, ["Month Number"])),
-    movementType: getValue(normalized, ["Movement Type"]),
-    mrp: toNumber(getValue(normalized, ["MRP"])),
-    productName: getValue(normalized, ["Product Name"]),
-    quantity: toNumber(getValue(normalized, ["Quantity", "Sales Quantity", "Units Sold"])),
-    revenuePerUnit: toNumber(getValue(normalized, ["Revenue per Unit"])),
-    season: getValue(normalized, ["Season"]),
-    size: getValue(normalized, ["Size"]),
-    state: getValue(normalized, ["State"]),
-    stock: toNumber(getValue(normalized, ["Stock", "Inventory"])),
-    storeName: getValue(normalized, ["Store Name"]),
-    year: getValue(normalized, ["Year"])
+    ageingCategory: getValue(normalized, "Ageing Category"),
+    ageingDays: toNumber(getValue(normalized, "Ageing Days")),
+    amount: toNumber(getValue(normalized, "Amount", "Revenue", "Sales")),
+    billDate: getValue(normalized, "Bill Date", "Date"),
+    day: getValue(normalized, "Day"),
+    department: getValue(normalized, "Department", "Product Name.1"),
+    month: getValue(normalized, "Month"),
+    monthNumber: toNumber(getValue(normalized, "Month Number")),
+    movementType: getValue(normalized, "Movement Type"),
+    mrp: toNumber(getValue(normalized, "MRP")),
+    productName: getValue(normalized, "Product Name"),
+    quantity: toNumber(getValue(normalized, "Quantity", "Sales Quantity", "Units Sold")),
+    revenuePerUnit: toNumber(getValue(normalized, "Revenue per Unit")),
+    season: getValue(normalized, "Season"),
+    size: getValue(normalized, "Size"),
+    state: getValue(normalized, "State"),
+    stock: toNumber(getValue(normalized, "Stock", "Inventory")),
+    storeName: getValue(normalized, "Store Name"),
+    year: getValue(normalized, "Year")
   };
 }
 
 function mapMonthlySales(row: CsvRow): MonthlySalesRow {
   const normalized = normalizedRow(row);
   return {
-    date: getValue(normalized, ["Date"]),
-    sales: toNumber(getValue(normalized, ["Sales", "Revenue"]))
+    date: getValue(normalized, "Date"),
+    sales: toNumber(getValue(normalized, "Sales", "Revenue"))
   };
 }
 
 export function mapForecast(row: CsvRow): ForecastRow {
   const normalized = normalizedRow(row);
   return {
-    date: getValue(normalized, ["Date"]),
-    forecastDemand: toNumber(getValue(normalized, ["Forecast Demand", "Prediction", "Forecast"]))
+    date: getValue(normalized, "Date"),
+    forecastDemand: toNumber(getValue(normalized, "Forecast Demand", "Prediction", "Forecast"))
   };
 }
 
 export function mapModelMetric(row: CsvRow): ModelMetricRow {
   const normalized = normalizedRow(row);
   return {
-    mae: toNumber(getValue(normalized, ["MAE"])),
-    mape: toNumber(getValue(normalized, ["MAPE"])),
-    model: getValue(normalized, ["Model"]),
-    r2: toNumber(getValue(normalized, ["R2", "R²"])),
-    rmse: toNumber(getValue(normalized, ["RMSE"]))
+    mae: toNumber(getValue(normalized, "MAE")),
+    mape: toNumber(getValue(normalized, "MAPE")),
+    model: getValue(normalized, "Model"),
+    r2: toNumber(getValue(normalized, "R2", "R²")),
+    rmse: toNumber(getValue(normalized, "RMSE"))
   };
 }
 

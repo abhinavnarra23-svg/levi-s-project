@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, FileCode2, ImageDown } from "lucide-react";
+import { Download, FileCode2, ImageDown, Maximize2 } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 
 type ChartCardProps = {
@@ -10,6 +10,8 @@ type ChartCardProps = {
   children: ReactNode;
   className?: string;
   exportData?: Array<Record<string, string | number>>;
+  allowFullscreen?: boolean;
+  emphasizeTitle?: boolean;
 };
 
 export function ChartCard({
@@ -17,7 +19,9 @@ export function ChartCard({
   description,
   children,
   className = "",
-  exportData = []
+  exportData = [],
+  allowFullscreen = false,
+  emphasizeTitle = false
 }: ChartCardProps) {
   const cardRef = useRef<HTMLElement | null>(null);
 
@@ -79,6 +83,10 @@ export function ChartCard({
     URL.revokeObjectURL(url);
   }
 
+  function openFullscreen() {
+    void cardRef.current?.requestFullscreen();
+  }
+
   return (
     <motion.section
       ref={cardRef}
@@ -91,16 +99,26 @@ export function ChartCard({
     >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-slate-950 dark:text-white">
+          <h3 className={emphasizeTitle ? "text-xl font-bold text-black dark:text-white" : "text-lg font-semibold text-slate-950 dark:text-white"}>
             {title}
           </h3>
           {description ? (
-            <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className={emphasizeTitle ? "mt-1 text-xs leading-5 text-slate-400 dark:text-slate-400" : "mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400"}>
               {description}
             </p>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
+          {allowFullscreen ? (
+            <button
+              className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+              onClick={openFullscreen}
+              title="Open fullscreen"
+              type="button"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </button>
+          ) : null}
           <button
             className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
             onClick={downloadCsv}

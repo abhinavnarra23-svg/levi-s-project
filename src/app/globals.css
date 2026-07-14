@@ -22,8 +22,8 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  background: #f8fafc;
-  color: #1f2937;
+  background: #ffffff;
+  color: #003049;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -43,7 +43,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid rgba(196, 18, 48, 0.42);
+  outline: 2px solid rgba(193, 18, 31, 0.42);
   outline-offset: 2px;
 }
 
@@ -57,24 +57,24 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.28);
+  background: rgba(102, 155, 188, 0.38);
   border: 3px solid transparent;
   border-radius: 999px;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.45);
+  background: rgba(0, 48, 73, 0.5);
   border: 3px solid transparent;
   background-clip: content-box;
 }
 
 ::selection {
-  background: rgba(196, 18, 48, 0.14);
-  color: #111827;
+  background: rgba(193, 18, 31, 0.16);
+  color: #003049;
 }
 
 .dark body {
-  background: #0f172a;
+  background: #003049;
   color: #e5e7eb;
 }

@@ -18,6 +18,7 @@ import {
   type LucideIcon
 } from "lucide-react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
   Area,
@@ -41,14 +42,32 @@ import {
 
 import { ChartCard } from "@/components/charts/chart-card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { useAnalytics } from "@/context/analytics-context";
 import { formatNumber } from "@/lib/formatters";
 import { DataService } from "@/services/DataService";
+import { ForecastAllocationService } from "@/services/ForecastAllocationService";
 import {
   loadForecastExcelData,
   type ForecastExcelData,
   type ForecastModelComparisonRow
 } from "@/services/ForecastExcelService";
 import type { MonthlySalesRow } from "@/types/analytics";
+
+const ForecastExecutiveRibbon = dynamic(
+  () => import("@/components/charts/forecast-breakdown-charts").then((module) => module.ForecastExecutiveRibbon),
+  {
+    loading: () => <LoadingSkeleton />,
+    ssr: false
+  }
+);
+
+const ForecastBreakdownCharts = dynamic(
+  () => import("@/components/charts/forecast-breakdown-charts").then((module) => module.ForecastBreakdownCharts),
+  {
+    loading: () => <div className="xl:col-span-2"><LoadingSkeleton /></div>,
+    ssr: false
+  }
+);
 
 type ChartPoint = {
   date: string;
@@ -91,11 +110,11 @@ const forecastXAxisProps = {
 } as const;
 
 const colors = {
-  blue: "#2563EB",
-  green: "#16A34A",
+  blue: "#669BBC",
+  green: "#003049",
   grey: "#6B7280",
-  orange: "#F59E0B",
-  red: "#C41230"
+  navy: "#003049",
+  red: "#C1121F"
 };
 
 function monthLabel(date: string) {
@@ -196,6 +215,8 @@ function smartLabelData(data: ChartPoint[], dataKey: "forecastDemand" | "forecas
       labelDx = index % 2 === 0 ? -8 : 8;
     }
 
+    if (dataKey === "forecastDemand") labelDy -= 10;
+
     return { ...row, labelDx, labelDy };
   });
 }
@@ -221,7 +242,7 @@ function CustomTooltip({
             const key = String(item.dataKey ?? item.name ?? "");
             const isDemand = key.toLowerCase().includes("demand");
             return (
-              <p className="flex items-center justify-between gap-5 font-medium text-slate-600 dark:text-slate-300" key={`${key}-${item.value}`}>
+              <p className="flex items-center justify-between gap-5 font-semibold text-slate-950 dark:text-white" key={`${key}-${item.value}`}>
                 <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                 <span>{item.name ?? key}</span>
                 <span className="font-bold text-slate-950 dark:text-white">{isDemand ? formatNumber(Number(item.value)) : formatCompactCurrency(Number(item.value))}</span>
@@ -248,7 +269,7 @@ const ForecastHero = memo(function ForecastHero() {
             Forecast Analytics
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            AI-powered forecasting for future sales, product demand, inventory planning and business decision support.
+            AI-powered sales and demand forecasting with department, all-store and seasonal analysis for inventory planning and business decisions.
           </p>
         </div>
       </div>
@@ -336,11 +357,11 @@ function ExecutiveKpiCard({
     danger: "bg-red-50 text-brand-red dark:bg-red-500/10",
     info: "bg-blue-50 text-blue-600 dark:bg-blue-500/10",
     neutral: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-    success: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10",
+    success: "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue",
     warning: "bg-amber-50 text-amber-600 dark:bg-amber-500/10"
   };
   const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : Minus;
-  const trendClass = trend === "up" ? "text-emerald-600" : trend === "down" ? "text-red-600" : "text-slate-500";
+  const trendClass = trend === "up" ? "text-brand-ink dark:text-brand-blue" : trend === "down" ? "text-red-600" : "text-slate-500";
   const points = sparkline === "down" ? "0,18 18,12 36,15 54,8 72,14 90,4" : sparkline === "flat" ? "0,12 18,11 36,13 54,12 72,13 90,11" : "0,18 18,15 36,16 54,10 72,12 90,4";
 
   return (
@@ -366,7 +387,7 @@ function ExecutiveKpiCard({
       <div className="mt-3 flex items-end justify-between gap-3">
         <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</p>
         <svg className="h-7 w-20 shrink-0" viewBox="0 0 90 24">
-          <polyline fill="none" points={points} stroke={tone === "danger" ? colors.red : tone === "warning" ? colors.orange : tone === "success" ? colors.green : colors.blue} strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+          <polyline fill="none" points={points} stroke={tone === "danger" ? colors.red : tone === "warning" ? colors.navy : tone === "success" ? colors.green : colors.blue} strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
         </svg>
       </div>
     </motion.article>
@@ -434,7 +455,7 @@ function ForecastVsActualChart({ data, forecastStart }: { data: ChartPoint[]; fo
         <ResponsiveContainer height="100%" width="100%">
           <LineChart data={data} margin={{ bottom: 8, left: 12, right: 24, top: 22 }}>
             <CartesianGrid stroke="#E5E7EB" strokeDasharray="4 4" strokeOpacity={0.75} vertical={false} />
-            {forecastStart && lastPoint ? <ReferenceArea fill="#C41230" fillOpacity={0.055} x1={forecastStart} x2={lastPoint} /> : null}
+            {forecastStart && lastPoint ? <ReferenceArea fill="#C1121F" fillOpacity={0.055} x1={forecastStart} x2={lastPoint} /> : null}
             <XAxis dataKey="name" minTickGap={18} tick={{ ...axisStyle, fontSize: 13 }} tickLine={false} />
             <YAxis tick={{ ...axisStyle, fontSize: 13 }} tickFormatter={(value) => formatCompactCurrency(Number(value))} tickLine={false} width={82} />
             <Tooltip content={<CustomTooltip />} />
@@ -447,7 +468,7 @@ function ForecastVsActualChart({ data, forecastStart }: { data: ChartPoint[]; fo
                 fill={colors.red}
                 ifOverflow="extendDomain"
                 key={`${point?.name}-${index}`}
-                label={{ fill: colors.red, fontSize: 10, fontWeight: 700, offset: 10, position: labelPositions[index] ?? "top", value: formatCompactCurrency(Number(point?.forecastSales ?? 0)) }}
+                label={{ fill: "#000000", fontSize: 10, fontWeight: 700, offset: 10, position: labelPositions[index] ?? "top", value: formatCompactCurrency(Number(point?.forecastSales ?? 0)) }}
                 r={5}
                 stroke="#fff"
                 strokeWidth={2}
@@ -523,7 +544,7 @@ function SingleForecastTrendChart({
                 fill={color}
                 ifOverflow="extendDomain"
                 key={`${title}-${point?.name}-${index}`}
-                label={{ fill: color, fontSize: 11, fontWeight: 800, offset: 32, position: index === 0 ? "top" : "bottom", value: index === 0 ? "High" : "Low" }}
+                label={{ fill: "#000000", fontSize: 11, fontWeight: 800, offset: 32, position: index === 0 ? "top" : "bottom", value: index === 0 ? "High" : "Low" }}
                 r={6}
                 stroke="#fff"
                 strokeWidth={2}
@@ -554,12 +575,12 @@ function SalesDemandChart({ data }: { data: ChartPoint[] }) {
             <YAxis orientation="right" yAxisId="demand" tick={{ ...axisStyle, fontSize: 13 }} tickFormatter={(value) => formatNumber(Number(value))} tickLine={false} width={64} />
             <Tooltip content={<CustomTooltip />} />
             <Legend iconType="circle" wrapperStyle={{ color: "#000000", fontSize: 13, fontWeight: 500, paddingTop: 8 }} />
-            <Line activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} dataKey="forecastSales" dot={{ fill: "#fff", r: 4, stroke: colors.green, strokeWidth: 2 }} name="Sales Forecast" stroke={colors.green} strokeWidth={4} type="monotone" yAxisId="sales" />
-            <Line activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} dataKey="forecastDemand" dot={{ fill: "#fff", r: 4, stroke: colors.orange, strokeWidth: 2 }} name="Demand Forecast" stroke={colors.orange} strokeWidth={4} type="monotone" yAxisId="demand" />
+            <Line activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} dataKey="forecastSales" dot={{ fill: "#fff", r: 4, stroke: colors.red, strokeWidth: 2 }} name="Sales Forecast" stroke={colors.red} strokeWidth={4} type="monotone" yAxisId="sales" />
+            <Line activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} dataKey="forecastDemand" dot={{ fill: "#fff", r: 4, stroke: colors.navy, strokeWidth: 2 }} name="Demand Forecast" stroke={colors.navy} strokeWidth={4} type="monotone" yAxisId="demand" />
             <ReferenceDot
-              fill={colors.green}
+              fill={colors.red}
               ifOverflow="extendDomain"
-              label={{ fill: colors.green, fontSize: 11, position: "top", value: "Peak Sales" }}
+              label={{ fill: "#000000", fontSize: 11, fontWeight: 700, position: "top", value: "Peak Sales" }}
               r={6}
               stroke="#fff"
               strokeWidth={2}
@@ -568,9 +589,9 @@ function SalesDemandChart({ data }: { data: ChartPoint[] }) {
               yAxisId="sales"
             />
             <ReferenceDot
-              fill={colors.orange}
+              fill={colors.navy}
               ifOverflow="extendDomain"
-              label={{ fill: colors.orange, fontSize: 11, position: "bottom", value: "Peak Demand" }}
+              label={{ fill: "#000000", fontSize: 11, fontWeight: 700, position: "bottom", value: "Peak Demand" }}
               r={6}
               stroke="#fff"
               strokeWidth={2}
@@ -587,7 +608,7 @@ function SalesDemandChart({ data }: { data: ChartPoint[] }) {
 
 function GrowthChart({ data }: { data: ChartPoint[] }) {
   return (
-    <ChartCard exportData={chartExport(data)} title="Monthly Forecast Growth (%)">
+    <ChartCard className="xl:col-span-2" exportData={chartExport(data)} title="Monthly Forecast Growth (%)">
       <div className="h-64">
         <ResponsiveContainer height="100%" width="100%">
           <BarChart data={data} margin={{ bottom: 28, left: 6, right: 18, top: 24 }}>
@@ -599,7 +620,7 @@ function GrowthChart({ data }: { data: ChartPoint[] }) {
                 active && payload?.length ? (
                   <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-panel dark:border-slate-700 dark:bg-slate-950">
                     <p className="font-semibold text-slate-950 dark:text-white">{label}</p>
-                    <p className="mt-2 text-slate-600 dark:text-slate-300">Growth: {formatPercent(Number(payload[0].value ?? 0))}</p>
+                    <p className="mt-2 font-semibold text-slate-950 dark:text-white">Growth: {formatPercent(Number(payload[0].value ?? 0))}</p>
                   </div>
                 ) : null
               }
@@ -622,9 +643,9 @@ function ForecastTable({ rows }: { rows: ForecastTableRow[] }) {
   const [sortKey, setSortKey] = useState<"demandChange" | "growth" | "month">("month");
   const badgeClass = {
     "Decrease": "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300",
-    "Increase": "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
+    "Increase": "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue",
     "Stable": "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
-    "Increase Inventory": "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
+    "Increase Inventory": "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue",
     "Maintain Inventory": "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
     "Reduce Inventory": "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300"
   };
@@ -675,8 +696,8 @@ function ForecastTable({ rows }: { rows: ForecastTableRow[] }) {
                 <td className="px-4 py-3 text-slate-700 dark:text-slate-200">{row.month}</td>
                 <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">{row.forecastSales}</td>
                 <td className="px-4 py-3 text-slate-700 dark:text-slate-200">{row.forecastDemand}</td>
-                <td className={`px-4 py-3 font-semibold ${Number(row.growth) >= 0 ? "text-emerald-600" : "text-red-600"}`}>{formatPercent(Number(row.growth))}</td>
-                <td className={`px-4 py-3 font-semibold ${Number(row.demandChange) >= 0 ? "text-emerald-600" : "text-red-600"}`}>{formatPercent(Number(row.demandChange))}</td>
+                <td className={`px-4 py-3 font-semibold ${Number(row.growth) >= 0 ? "text-brand-ink dark:text-brand-blue" : "text-red-600"}`}>{formatPercent(Number(row.growth))}</td>
+                <td className={`px-4 py-3 font-semibold ${Number(row.demandChange) >= 0 ? "text-brand-ink dark:text-brand-blue" : "text-red-600"}`}>{formatPercent(Number(row.demandChange))}</td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-3 py-1 text-xs font-bold ${badgeClass[String(row.trendIndicator) as keyof typeof badgeClass] ?? badgeClass.Stable}`}>
                     {row.trendIndicator}
@@ -713,11 +734,11 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
   ];
   const rankClass = (index: number) =>
     index === 0
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200"
+      ? "bg-brand-blue/20 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue"
       : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
-  const rmseClass = (index: number) => index === 0 ? "text-emerald-700 dark:text-emerald-300" : index === 1 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
-  const mapeClass = (index: number, value: number) => index === 0 ? "text-emerald-700 dark:text-emerald-300" : value < 30 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
-  const r2Class = (value: number) => value >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-slate-700 dark:text-slate-300";
+  const rmseClass = (index: number) => index === 0 ? "text-brand-ink dark:text-brand-blue" : index === 1 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
+  const mapeClass = (index: number, value: number) => index === 0 ? "text-brand-ink dark:text-brand-blue" : value < 30 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
+  const r2Class = (value: number) => value >= 0 ? "text-brand-ink dark:text-brand-blue" : "text-slate-700 dark:text-slate-300";
   const renderTable = (title: string, tableRows: ForecastModelComparisonRow[]) => (
     <div className="min-h-[252px] overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
       <div className="bg-slate-50 px-4 py-3 text-sm font-bold text-slate-950 dark:bg-slate-950 dark:text-white">
@@ -733,7 +754,7 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
           {tableRows.map((row, index) => (
-            <tr className={`text-slate-700 transition dark:text-slate-200 ${index === 0 ? "border-l-4 border-emerald-500 bg-emerald-50/80 shadow-sm dark:bg-emerald-500/10" : "hover:bg-slate-50 dark:hover:bg-slate-950/70"}`} key={`${title}-${row.model}-${index}`}>
+            <tr className={`text-slate-700 transition dark:text-slate-200 ${index === 0 ? "border-l-4 border-brand-blue bg-brand-blue/10 shadow-sm dark:bg-brand-blue/10" : "hover:bg-slate-50 dark:hover:bg-slate-950/70"}`} key={`${title}-${row.model}-${index}`}>
               <td className="px-3 py-2">
                 <span className={`rounded-full px-2 py-1 text-[10px] font-black ${rankClass(index)}`}>
                   #{index + 1}
@@ -748,7 +769,7 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
               <td className={`px-3 py-2 font-bold ${mapeClass(index, row.mape)}`}>{formatPercent(row.mape)}</td>
               <td className={`px-3 py-2 font-semibold ${r2Class(row.r2)}`}>{row.r2.toFixed(2)}</td>
               <td className="px-3 py-2">
-                <span className={`rounded-full px-2 py-1 text-[10px] font-black ${index === 0 ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"}`}>
+                <span className={`rounded-full px-2 py-1 text-[10px] font-black ${index === 0 ? "bg-brand-blue/20 text-brand-ink" : "bg-slate-100 text-slate-600"}`}>
                   {index === 0 ? "Best Model" : "Trained Model"}
                 </span>
               </td>
@@ -837,6 +858,7 @@ function ForecastFooter({
 }
 
 export default function DemandForecastingPage() {
+  const { data, isLoading: isBreakdownLoading } = useAnalytics();
   const [monthlySales, setMonthlySales] = useState<MonthlySalesRow[]>([]);
   const [excelData, setExcelData] = useState<ForecastExcelData | null>(null);
   const [excelError, setExcelError] = useState<string | null>(null);
@@ -944,10 +966,29 @@ export default function DemandForecastingPage() {
     [forecastRows, lastHistoricalSalesBeforeForecast]
   );
 
-  const totalForecast = forecastRows.reduce((total, row) => total + Number(row.forecastSales), 0);
-  const totalDemand = forecastRows.reduce((total, row) => total + Number(row.forecastDemand), 0);
-  const peakForecast = [...forecastRows].sort((a, b) => Number(b.forecastSales) - Number(a.forecastSales))[0];
-  const lowestForecast = [...forecastRows].sort((a, b) => Number(a.forecastSales) - Number(b.forecastSales))[0];
+  const forecastSummary = useMemo(() => {
+    let totalForecast = 0;
+    let totalDemand = 0;
+    let peakForecast = forecastRows[0];
+    let lowestForecast = forecastRows[0];
+
+    for (const row of forecastRows) {
+      totalForecast += Number(row.forecastSales);
+      totalDemand += Number(row.forecastDemand);
+      if (!peakForecast || Number(row.forecastSales) > Number(peakForecast.forecastSales)) peakForecast = row;
+      if (!lowestForecast || Number(row.forecastSales) < Number(lowestForecast.forecastSales)) lowestForecast = row;
+    }
+
+    return { lowestForecast, peakForecast, totalDemand, totalForecast };
+  }, [forecastRows]);
+  const { lowestForecast, peakForecast, totalDemand, totalForecast } = forecastSummary;
+  const forecastBreakdowns = useMemo(() => {
+    return ForecastAllocationService.build(
+      data?.salesInventory ?? [],
+      totalForecast,
+      totalDemand
+    );
+  }, [data, totalDemand, totalForecast]);
   const averageForecast = forecastRows.length ? totalForecast / forecastRows.length : 0;
   const lastGrowth = Number(growthData.at(-1)?.growth ?? 0);
   const businessRecommendation = recommendationFromTrend(lastGrowth);
@@ -1001,6 +1042,11 @@ export default function DemandForecastingPage() {
               <ExecutiveKpiCard key={kpi.label} {...kpi} />
             ))}
           </section>
+          <ForecastExecutiveRibbon
+            breakdowns={forecastBreakdowns}
+            isLoading={isBreakdownLoading}
+            monthlyForecast={forecastLineData}
+          />
           <section className="grid gap-6 xl:grid-cols-2">
             <ForecastVsActualChart data={chartData} forecastStart={String(forecastRows[0]?.name)} />
             <SingleForecastTrendChart
@@ -1012,7 +1058,7 @@ export default function DemandForecastingPage() {
               valueLabel="Forecast Sales"
             />
             <SingleForecastTrendChart
-              color={colors.orange}
+              color={colors.navy}
               data={forecastLineData}
               dataKey="forecastDemand"
               formatter={formatNumber}
@@ -1020,14 +1066,19 @@ export default function DemandForecastingPage() {
               valueLabel="Forecast Demand"
             />
             <SalesDemandChart data={forecastLineData} />
+            <ForecastBreakdownCharts
+              breakdowns={forecastBreakdowns}
+              isLoading={isBreakdownLoading}
+              monthlyForecast={forecastLineData}
+            />
+            <GrowthChart data={growthData} />
             <ForecastTable rows={tableRows} />
             <ModelEvaluation rows={excelData.modelComparison} />
-            <GrowthChart data={growthData} />
-            <ChartCard exportData={forecastLineData.map((row) => ({ demand: row.forecastDemand ?? "", month: row.name, sales: row.forecastSales ?? "" }))} title="Forecast Planning Signal">
+            <ChartCard className="xl:col-span-2" exportData={forecastLineData.map((row) => ({ demand: row.forecastDemand ?? "", month: row.name, sales: row.forecastSales ?? "" }))} title="Forecast Planning Signal">
               <div className="grid h-64 content-center gap-4">
                 {[
                   { color: colors.green, icon: Activity, label: "Sales Outlook", value: formatCompactCurrency(totalForecast) },
-                  { color: colors.orange, icon: BarChart3, label: "Demand Outlook", value: formatNumber(totalDemand) },
+                  { color: colors.navy, icon: BarChart3, label: "Demand Outlook", value: formatNumber(totalDemand) },
                   { color: colors.red, icon: Sparkles, label: "Inventory Recommendation", value: businessRecommendation }
                 ].map((item) => {
                   const Icon = item.icon;

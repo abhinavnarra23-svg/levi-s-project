@@ -56,29 +56,29 @@ const axisStyle = {
 };
 
 const palette = {
-  blue: "#2563EB",
-  deepRed: "#A80F24",
-  green: "#16A34A",
+  blue: "#669BBC",
+  deepRed: "#780000",
+  green: "#003049",
   grey: "#94A3B8",
-  lightBlue: "#60A5FA",
-  mediumBlue: "#3B82F6",
-  orange: "#F59E0B",
-  red: "#C41230",
-  softBlue: "#BFDBFE",
-  teal: "#0F766E"
+  lightBlue: "#669BBC",
+  mediumBlue: "#669BBC",
+  orange: "#FDF0D5",
+  red: "#C1121F",
+  softBlue: "#FDF0D5",
+  teal: "#003049"
 };
 
 const departmentColors = [
-  "#C41230",
-  "#2563EB",
-  "#16A34A",
-  "#F59E0B",
+  "#C1121F",
+  "#669BBC",
+  "#003049",
+  "#FDF0D5",
   "#7C3AED",
-  "#0F766E",
+  "#003049",
   "#DC2626",
   "#6B7280",
-  "#0891B2",
-  "#BE123C"
+  "#669BBC",
+  "#780000"
 ];
 
 function trimCompactDecimals(formatted: string) {
@@ -167,7 +167,7 @@ function seasonRevenueColor(item: SalesDatum) {
   if (season === "winter") return palette.blue;
   if (season === "monsoon") return palette.teal;
   if (season === "summer") return palette.orange;
-  if (season === "spring") return palette.green;
+  if (season === "spring") return palette.red;
   return palette.blue;
 }
 
@@ -307,7 +307,7 @@ function SalesKpiCard({ kpi }: { kpi: KpiRecord }) {
   const trend = {
     danger: { className: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300", icon: ArrowDownRight },
     neutral: { className: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300", icon: Minus },
-    success: { className: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300", icon: ArrowUpRight },
+    success: { className: "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue", icon: ArrowUpRight },
     warning: { className: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300", icon: TrendingDown }
   }[kpi.tone ?? "neutral"];
   const TrendIcon = trend.icon;

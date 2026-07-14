@@ -36,7 +36,7 @@ type HeatmapDatum = {
   z?: number;
 };
 
-const colors = ["#C41230", "#2563EB", "#16A34A", "#F59E0B", "#6B7280"];
+const colors = ["#C1121F", "#669BBC", "#003049", "#FDF0D5", "#6B7280"];
 
 const axisStyle = {
   fill: "#000000",
@@ -67,9 +67,9 @@ export function TrendChart({
             <YAxis tick={axisStyle} tickLine={false} />
             <Tooltip />
             <Legend wrapperStyle={{ color: "#000000", fontWeight: 500 }} />
-            <Line dataKey={dataKey} dot={false} stroke="#C41230" strokeWidth={3} type="monotone" />
+            <Line dataKey={dataKey} dot={false} stroke="#C1121F" strokeWidth={3} type="monotone" />
             {secondaryKey ? (
-              <Line dataKey={secondaryKey} dot={false} stroke="#2563EB" strokeWidth={3} type="monotone" />
+              <Line dataKey={secondaryKey} dot={false} stroke="#669BBC" strokeWidth={3} type="monotone" />
             ) : null}
           </LineChart>
         </ResponsiveContainer>
@@ -96,15 +96,15 @@ export function AreaAnalyticsChart({
           <AreaChart data={data} margin={{ bottom: 8, left: 0, right: 12, top: 8 }}>
             <defs>
               <linearGradient id={`${dataKey}-gradient`} x1="0" x2="0" y1="0" y2="1">
-                <stop offset="5%" stopColor="#C41230" stopOpacity={0.28} />
-                <stop offset="95%" stopColor="#C41230" stopOpacity={0.02} />
+                <stop offset="5%" stopColor="#C1121F" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#C1121F" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={axisStyle} tickLine={false} />
             <YAxis tick={axisStyle} tickLine={false} />
             <Tooltip />
-            <Area dataKey={dataKey} fill={`url(#${dataKey}-gradient)`} stroke="#C41230" strokeWidth={3} type="monotone" />
+            <Area dataKey={dataKey} fill={`url(#${dataKey}-gradient)`} stroke="#C1121F" strokeWidth={3} type="monotone" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -117,7 +117,7 @@ export function BarAnalyticsChart({
   description,
   data,
   dataKey,
-  color = "#2563EB"
+  color = "#669BBC"
 }: {
   title: string;
   description?: string;
@@ -164,7 +164,7 @@ export function HorizontalBarChart({
             <XAxis tick={axisStyle} tickLine={false} type="number" />
             <YAxis dataKey="name" tick={axisStyle} tickLine={false} type="category" width={110} />
             <Tooltip />
-            <Bar dataKey={dataKey} fill="#C41230" radius={[0, 8, 8, 0]}>
+            <Bar dataKey={dataKey} fill="#C1121F" radius={[0, 8, 8, 0]}>
               <LabelList dataKey={dataKey} position="right" style={{ fill: "#000000", fontSize: 11, fontWeight: 600 }} />
             </Bar>
           </BarChart>
@@ -222,15 +222,15 @@ export function ForecastChart({
             <Tooltip />
             <Legend wrapperStyle={{ color: "#000000", fontWeight: 500 }} />
             {"upper" in (data[0] ?? {}) ? (
-              <Area dataKey="upper" fill="#2563EB" fillOpacity={0.12} stroke="none" type="monotone" />
+              <Area dataKey="upper" fill="#669BBC" fillOpacity={0.12} stroke="none" type="monotone" />
             ) : null}
             {"lower" in (data[0] ?? {}) ? (
               <Area dataKey="lower" fill="#FFFFFF" stroke="none" type="monotone" />
             ) : null}
             {"actual" in (data[0] ?? {}) ? (
-              <Line dataKey="actual" dot={false} stroke="#C41230" strokeWidth={3} type="monotone" />
+              <Line dataKey="actual" dot={false} stroke="#C1121F" strokeWidth={3} type="monotone" />
             ) : null}
-            <Line dataKey="predicted" dot={false} stroke="#2563EB" strokeDasharray="6 4" strokeWidth={3} type="monotone" />
+            <Line dataKey="predicted" dot={false} stroke="#669BBC" strokeDasharray="6 4" strokeWidth={3} type="monotone" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -263,7 +263,7 @@ export function HeatmapChart({
             <YAxis allowDuplicatedCategory={false} dataKey="y" name="Store" tick={axisStyle} type="category" width={120} />
             <ZAxis dataKey="z" range={[120, 820]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Scatter data={scatterData} fill="#C41230" />
+            <Scatter data={scatterData} fill="#C1121F" />
           </ScatterChart>
         </ResponsiveContainer>
       </div>
@@ -290,7 +290,7 @@ export function ScatterAnalyticsChart({
             <YAxis dataKey="y" tick={axisStyle} tickLine={false} type="number" />
             <ZAxis dataKey="z" range={[60, 180]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Scatter data={data} fill="#C41230" />
+            <Scatter data={data} fill="#C1121F" />
           </ScatterChart>
         </ResponsiveContainer>
       </div>

@@ -28,9 +28,15 @@ function uniqueSorted(rows: SalesInventoryRow[], key: FilterKey) {
 
 export const FilterService = {
   filterRows(rows: SalesInventoryRow[], filters: FilterState) {
-    return rows.filter((row) =>
-      filterKeys.every((key) => filters[key] === "All" || String(row[key]) === filters[key])
-    );
+    const activeFilters = filterKeys.filter((key) => filters[key] !== "All");
+    if (!activeFilters.length) return rows;
+
+    return rows.filter((row) => {
+      for (const key of activeFilters) {
+        if (String(row[key]) !== filters[key]) return false;
+      }
+      return true;
+    });
   },
 
   getOptions(rows: SalesInventoryRow[]): FilterOptions {

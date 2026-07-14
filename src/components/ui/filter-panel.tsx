@@ -1,6 +1,7 @@
 "use client";
 
 import { Filter, RotateCcw } from "lucide-react";
+import { memo } from "react";
 
 import { useAnalytics } from "@/context/analytics-context";
 import type { FilterKey } from "@/types/analytics";
@@ -15,7 +16,7 @@ const fields: Array<[FilterKey, string]> = [
   ["size", "Size"]
 ];
 
-export function FilterPanel() {
+export const FilterPanel = memo(function FilterPanel() {
   const { filterOptions, filters, resetFilters, setFilter } = useAnalytics();
 
   return (
@@ -55,4 +56,4 @@ export function FilterPanel() {
       </div>
     </section>
   );
-}
+});

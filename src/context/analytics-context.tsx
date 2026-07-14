@@ -27,16 +27,17 @@ type AnalyticsContextValue = {
 };
 
 const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
-const analyticsRoutes = new Set(["/business-insights", "/inventory-analytics", "/sales-analytics"]);
+const analyticsRoutes = new Set(["/business-insights", "/demand-forecasting", "/inventory-analytics", "/sales-analytics"]);
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const shouldLoadAnalytics = analyticsRoutes.has(pathname);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   useEffect(() => {
-    if (!analyticsRoutes.has(pathname)) return;
+    if (!shouldLoadAnalytics) return;
 
     let isMounted = true;
 
@@ -55,7 +56,7 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [pathname]);
+  }, [shouldLoadAnalytics]);
 
   const resetFilters = useCallback(() => setFilters(defaultFilters), []);
   const setFilter = useCallback((key: keyof FilterState, selectedValue: string) => {

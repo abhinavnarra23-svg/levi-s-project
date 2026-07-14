@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import { memo } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,18 +17,18 @@ type KpiCardProps = {
 const toneClasses = {
   danger: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300",
   neutral: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-  success: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300",
+  success: "bg-brand-blue/15 text-brand-ink dark:bg-brand-blue/15 dark:text-brand-blue",
   warning: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300"
 };
 
 const toneTextClasses = {
   danger: "text-red-600 dark:text-red-300",
   neutral: "text-slate-500 dark:text-slate-400",
-  success: "text-emerald-600 dark:text-emerald-300",
+  success: "text-brand-ink dark:text-brand-blue",
   warning: "text-amber-600 dark:text-amber-300"
 };
 
-export function KpiCard({
+export const KpiCard = memo(function KpiCard({
   label,
   value,
   change,
@@ -61,4 +62,4 @@ export function KpiCard({
       </p>
     </motion.div>
   );
-}
+});
