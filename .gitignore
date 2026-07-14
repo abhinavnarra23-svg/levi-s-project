@@ -13,6 +13,12 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 next-dev.err
+*.tsbuildinfo
 
 .DS_Store
 Thumbs.db
+
+# Private source datasets stay local. Only privacy-safe dashboard derivatives
+# are committed for deployment.
+public/data/levis_sales_inventory.csv
+public/data/Sales_Feature_Importance.xlsx

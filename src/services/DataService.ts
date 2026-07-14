@@ -9,7 +9,7 @@ import type {
 
 const DATA_PATHS = {
   monthlySales: "/data/monthly_sales.csv",
-  salesInventory: "/data/levis_sales_inventory.csv"
+  salesInventory: "/data/dashboard_sales_inventory.csv"
 };
 
 let cachedData: Promise<AnalyticsData> | null = null;
