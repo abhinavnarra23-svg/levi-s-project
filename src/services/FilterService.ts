@@ -2,6 +2,7 @@ import type { FilterKey, FilterOptions, FilterState, SalesInventoryRow } from "@
 
 export const defaultFilters: FilterState = {
   department: "All",
+  gender: "All",
   month: "All",
   productName: "All",
   season: "All",
@@ -16,6 +17,7 @@ const filterKeys: FilterKey[] = [
   "storeName",
   "productName",
   "department",
+  "gender",
   "season",
   "size"
 ];

@@ -113,6 +113,7 @@ function mapSalesInventory(row: CsvRow): SalesInventoryRow {
     billDate: getValue(normalized, "Bill Date", "Date"),
     day: getValue(normalized, "Day"),
     department: getValue(normalized, "Department", "Product Name.1"),
+    gender: getValue(normalized, "Gender"),
     month: getValue(normalized, "Month"),
     monthNumber: toNumber(getValue(normalized, "Month Number")),
     movementType: getValue(normalized, "Movement Type"),

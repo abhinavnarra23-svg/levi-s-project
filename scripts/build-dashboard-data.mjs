@@ -19,6 +19,7 @@ const dashboardColumns = [
   "Amount",
   "Product Name",
   "Department",
+  "Gender",
   "MRP",
   "Size",
   "State ",
@@ -39,7 +40,6 @@ const sensitiveColumns = [
   "Alternate Product Code",
   "Salesman Name",
   "Return Status",
-  "Gender",
   "Product Description",
   "Customer Type",
   "Last Received Data"
@@ -75,7 +75,8 @@ const validations = [
   ["inventory", numericTotal(parsed.data, "Stock "), numericTotal(rows, "Stock ")],
   ["stores", uniqueCount(parsed.data, "Store Name"), uniqueCount(rows, "Store Name")],
   ["products", uniqueCount(parsed.data, "Product Name"), uniqueCount(rows, "Product Name")],
-  ["departments", uniqueCount(parsed.data, "Department"), uniqueCount(rows, "Department")]
+  ["departments", uniqueCount(parsed.data, "Department"), uniqueCount(rows, "Department")],
+  ["genders", uniqueCount(parsed.data, "Gender"), uniqueCount(rows, "Gender")]
 ];
 
 const mismatches = validations.filter(([, sourceValue, outputValue]) => sourceValue !== outputValue);
@@ -103,4 +104,4 @@ if (leakedColumns.length) {
 
 console.log(`Created ${path.relative(projectRoot, outputPath)} with ${rows.length.toLocaleString("en-IN")} analytics rows.`);
 console.log(`Removed ${sensitiveColumns.length} sensitive or unnecessary source columns.`);
-console.log("Validated row count, revenue, quantity, inventory, store, product, and department totals against the private source.");
+console.log("Validated row count, revenue, quantity, inventory, store, product, department, and gender totals against the private source.");

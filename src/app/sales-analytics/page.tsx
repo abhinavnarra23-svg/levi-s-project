@@ -20,8 +20,11 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Scatter,
   ScatterChart,
@@ -45,6 +48,7 @@ const filterFields: Array<[FilterKey, string]> = [
   ["storeName", "Store Name"],
   ["productName", "Product Name"],
   ["department", "Department"],
+  ["gender", "Gender"],
   ["season", "Season"],
   ["size", "Size"]
 ];
@@ -80,6 +84,7 @@ const departmentColors = [
   "#669BBC",
   "#780000"
 ];
+const genderColors = [palette.red, palette.green, palette.blue, palette.deepRed, palette.orange, palette.grey];
 
 function trimCompactDecimals(formatted: string) {
   return formatted.replace(/\.00(?= )/, "").replace(/(\.\d)0(?= )/, "$1");
@@ -134,6 +139,26 @@ function enrichRevenueData(data: ChartDatum[], rows: SalesInventoryRow[], key: k
     percentage: revenueTotal ? (Number(item.value ?? 0) / revenueTotal) * 100 : 0,
     quantity: quantityMap.get(String(item.name)) ?? 0
   })) as SalesDatum[];
+}
+
+function buildGenderSalesData(rows: SalesInventoryRow[]): SalesDatum[] {
+  const totals = new Map<string, { quantity: number; revenue: number }>();
+
+  rows.forEach((row) => {
+    const gender = row.gender.trim() || "Unknown";
+    const current = totals.get(gender) ?? { quantity: 0, revenue: 0 };
+    current.quantity += row.quantity;
+    current.revenue += row.amount;
+    totals.set(gender, current);
+  });
+
+  const totalRevenue = Array.from(totals.values()).reduce((total, item) => total + item.revenue, 0);
+  return Array.from(totals, ([name, item]) => ({
+    name,
+    percentage: totalRevenue ? (item.revenue / totalRevenue) * 100 : 0,
+    quantity: item.quantity,
+    value: item.revenue
+  })).sort((a, b) => Number(b.value) - Number(a.value));
 }
 
 function truncateLabel(value: string, maxLength = 24) {
@@ -259,7 +284,7 @@ function SalesFilterPanel() {
           ))}
         </div>
       ) : null}
-      <div className="grid gap-2 md:grid-cols-4 xl:grid-cols-8">
+      <div className="grid gap-2 md:grid-cols-4 xl:grid-cols-9">
         {filterFields.map(([key, label]) => (
           <label className="space-y-0.5" key={key}>
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -435,6 +460,67 @@ function SalesTooltip({
       {"quantity" in row ? <p className="text-slate-600">Quantity Sold: {formatNumber(Number(row.quantity))}</p> : null}
       {"percentage" in row ? <p className="text-slate-600">Contribution: {formatPercent(Number(row.percentage))}</p> : null}
     </div>
+  );
+}
+
+function GenderSalesTooltip({
+  active,
+  payload
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: SalesDatum }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0].payload;
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 shadow-panel">
+      <p className="font-semibold text-slate-950">Gender: {String(row.name)}</p>
+      <p className="mt-2 text-slate-600">Revenue: {formatCurrency(Number(row.value ?? 0))}</p>
+      <p className="text-slate-600">Units Sold: {formatNumber(Number(row.quantity ?? 0))}</p>
+      <p className="text-slate-600">Percentage: {formatPercent(Number(row.percentage ?? 0))}</p>
+    </div>
+  );
+}
+
+function GenderSalesDonutChart({ data }: { data: SalesDatum[] }) {
+  const visibleData = data.filter((item) => Number(item.value ?? 0) > 0);
+  const leader = visibleData[0];
+  const insight = leader
+    ? `${String(leader.name)} products contribute the largest revenue share at ${formatPercent(Number(leader.percentage ?? 0))}, indicating that this segment currently leads the selected sales mix.`
+    : "No gender sales contribution is available for the selected filters.";
+
+  return (
+    <SalesChartCard data={visibleData} title="Gender-wise Sales Distribution">
+      <div className="flex h-full flex-col">
+        <div className="min-h-0 flex-1">
+          <ResponsiveContainer height="100%" width="100%">
+            <PieChart>
+              <Pie
+                animationDuration={900}
+                data={visibleData}
+                dataKey="value"
+                innerRadius={62}
+                label={({ payload }) => formatPercent(Number(payload.percentage ?? 0))}
+                nameKey="name"
+                outerRadius={96}
+                paddingAngle={3}
+              >
+                {visibleData.map((item, index) => (
+                  <Cell fill={genderColors[index % genderColors.length]} key={`${item.name}-${index}`} />
+                ))}
+              </Pie>
+              <Tooltip content={<GenderSalesTooltip />} />
+              <Legend iconSize={10} wrapperStyle={{ color: "#000000", fontSize: 12, fontWeight: 500 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="mt-2 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          <span className="font-semibold text-slate-950 dark:text-white">Business Insight: </span>
+          {insight}
+        </p>
+      </div>
+    </SalesChartCard>
   );
 }
 
@@ -734,6 +820,7 @@ export default function SalesAnalyticsPage() {
 
     return {
       department: enrichRevenueData(ChartService.revenueBy(filteredRows, "department", 10), filteredRows, "department"),
+      gender: buildGenderSalesData(filteredRows),
       heatmap: ChartService.heatmap(filteredRows, "season", "storeName", "amount").map((item) => ({ ...item, value: item.z })),
       monthly,
       monthlyGrowth: ChartService.monthlyGrowth(filteredRows),
@@ -790,6 +877,7 @@ export default function SalesAnalyticsPage() {
         <GrowthBarChart data={charts.monthlyGrowth} title="Monthly Revenue Growth" />
         <SalesLineChart data={charts.yoy} percent title="Year-over-Year Revenue Growth" />
         <SalesHeatmapChart data={charts.heatmap} />
+        <GenderSalesDonutChart data={charts.gender} />
       </section>
     </div>
   );

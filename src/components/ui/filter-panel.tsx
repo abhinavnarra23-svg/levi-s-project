@@ -12,6 +12,7 @@ const fields: Array<[FilterKey, string]> = [
   ["storeName", "Store Name"],
   ["productName", "Product Name"],
   ["department", "Department"],
+  ["gender", "Gender"],
   ["season", "Season"],
   ["size", "Size"]
 ];

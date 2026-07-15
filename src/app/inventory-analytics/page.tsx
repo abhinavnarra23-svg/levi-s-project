@@ -32,6 +32,7 @@ import {
 
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAnalytics } from "@/context/analytics-context";
+import { formatCurrency as formatRupees } from "@/lib/formatters";
 import { ChartService } from "@/services/ChartService";
 import { KPIService } from "@/services/KPIService";
 import type { ChartDatum, FilterKey, KpiRecord, SalesInventoryRow } from "@/types/analytics";
@@ -44,6 +45,7 @@ const filterFields: Array<[FilterKey, string]> = [
   ["storeName", "Store Name"],
   ["productName", "Product Name"],
   ["department", "Department"],
+  ["gender", "Gender"],
   ["season", "Season"],
   ["size", "Size"]
 ];
@@ -77,6 +79,7 @@ const ageingColors: Record<string, string> = {
   moderate: palette.blue,
   slow: palette.orange
 };
+const genderColors = [palette.red, palette.green, palette.blue, palette.darkOrange, palette.orange, palette.grey];
 const sizeOrder = ["S", "M", "L", "XL", "2XL", "30", "32", "34", "36", "38"];
 
 function formatNumber(value: number) {
@@ -181,6 +184,31 @@ function buildInventoryStatusData(rows: SalesInventoryRow[]) {
     { color: palette.orange, metricLabel: "Products", name: "Low Stock", percentage: 0, rawName: "low", value: statusTotals.low },
     { color: palette.red, metricLabel: "Products", name: "Out Of Stock", percentage: 0, rawName: "out", value: statusTotals.out }
   ];
+}
+
+function buildGenderInventoryData(rows: SalesInventoryRow[]): InventoryDatum[] {
+  const totals = new Map<string, { inventoryUnits: number; inventoryValue: number }>();
+
+  rows.forEach((row) => {
+    const gender = row.gender.trim() || "Unknown";
+    const current = totals.get(gender) ?? { inventoryUnits: 0, inventoryValue: 0 };
+    current.inventoryUnits += row.stock;
+    current.inventoryValue += row.stock * row.mrp;
+    totals.set(gender, current);
+  });
+
+  const totalInventoryValue = Array.from(totals.values()).reduce(
+    (total, item) => total + item.inventoryValue,
+    0
+  );
+
+  return Array.from(totals, ([name, item]) => ({
+    inventoryUnits: item.inventoryUnits,
+    inventoryValue: item.inventoryValue,
+    name,
+    percentage: totalInventoryValue ? (item.inventoryValue / totalInventoryValue) * 100 : 0,
+    value: item.inventoryValue
+  })).sort((a, b) => Number(b.value) - Number(a.value));
 }
 
 function sortSizes(data: InventoryDatum[]) {
@@ -290,7 +318,7 @@ function InventoryFilterPanel() {
           ))}
         </div>
       ) : null}
-      <div className="grid gap-2 md:grid-cols-4 xl:grid-cols-8">
+      <div className="grid gap-2 md:grid-cols-4 xl:grid-cols-9">
         {filterFields.map(([key, label]) => (
           <label className="space-y-0.5" key={key}>
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -453,6 +481,67 @@ function InventoryTooltip({
       </p>
       {"percentage" in row ? <p className="text-slate-600">Contribution: {formatPercent(contribution)}</p> : null}
     </div>
+  );
+}
+
+function GenderInventoryTooltip({
+  active,
+  payload
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: InventoryDatum }>;
+}) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0].payload;
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 shadow-panel">
+      <p className="font-semibold text-slate-950">Gender: {String(row.name)}</p>
+      <p className="mt-2 text-slate-600">Inventory Units: {formatNumber(Number(row.inventoryUnits ?? 0))}</p>
+      <p className="text-slate-600">Inventory Value: {formatRupees(Number(row.inventoryValue ?? 0))}</p>
+      <p className="text-slate-600">Percentage Share: {formatPercent(Number(row.percentage ?? 0))}</p>
+    </div>
+  );
+}
+
+function GenderInventoryDonutChart({ data }: { data: InventoryDatum[] }) {
+  const visibleData = data.filter((item) => Number(item.value ?? 0) > 0);
+  const leader = visibleData[0];
+  const insight = leader
+    ? `Inventory allocation is primarily concentrated in the ${String(leader.name)} category at ${formatPercent(Number(leader.percentage ?? 0))} of inventory value for the selected filters.`
+    : "No gender inventory allocation is available for the selected filters.";
+
+  return (
+    <InventoryChartCard data={visibleData} title="Gender-wise Inventory Distribution">
+      <div className="flex h-full flex-col">
+        <div className="min-h-0 flex-1">
+          <ResponsiveContainer height="100%" width="100%">
+            <PieChart>
+              <Pie
+                animationDuration={900}
+                data={visibleData}
+                dataKey="value"
+                innerRadius={62}
+                label={({ payload }) => formatPercent(Number(payload.percentage ?? 0))}
+                nameKey="name"
+                outerRadius={96}
+                paddingAngle={3}
+              >
+                {visibleData.map((item, index) => (
+                  <Cell fill={genderColors[index % genderColors.length]} key={`${item.name}-${index}`} />
+                ))}
+              </Pie>
+              <Tooltip content={<GenderInventoryTooltip />} />
+              <Legend iconSize={10} wrapperStyle={{ color: "#000000", fontSize: 12, fontWeight: 500 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="mt-2 border-t border-slate-100 pt-3 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          <span className="font-semibold text-slate-950 dark:text-white">Business Insight: </span>
+          {insight}
+        </p>
+      </div>
+    </InventoryChartCard>
   );
 }
 
@@ -667,6 +756,7 @@ export default function InventoryAnalyticsPage() {
       dead: ChartService.movementProducts(filteredRows, "Dead"),
       department: ChartService.stockBy(filteredRows, "department", 10),
       fast: ChartService.movementProducts(filteredRows, "Fast"),
+      gender: buildGenderInventoryData(filteredRows),
       heatmap,
       product: ChartService.stockBy(filteredRows, "productName", 10),
       size: sortSizes(ChartService.stockBy(filteredRows, "size", 10)),
@@ -716,6 +806,7 @@ export default function InventoryAnalyticsPage() {
           data={charts.size}
           title="Inventory by Size"
         />
+        <GenderInventoryDonutChart data={charts.gender} />
       </section>
     </div>
   );

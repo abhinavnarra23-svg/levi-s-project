@@ -10,6 +10,7 @@ export type SalesInventoryRow = {
   monthNumber: number;
   day: string;
   season: string;
+  gender: string;
   quantity: number;
   amount: number;
   productName: string;
@@ -55,6 +56,7 @@ export type FilterKey =
   | "storeName"
   | "productName"
   | "department"
+  | "gender"
   | "season"
   | "size";
 
