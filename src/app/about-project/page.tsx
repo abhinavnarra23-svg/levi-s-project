@@ -4,7 +4,6 @@ import {
   BrainCircuit,
   CheckCircle2,
   FileText,
-  GitBranch,
   GraduationCap,
   Home,
   Layers3,
@@ -27,7 +26,6 @@ const objectives = [
   "Evaluate inventory availability and ageing patterns across stores and products.",
   "Identify fast-moving, slow-moving and dead-stock products.",
   "Analyze sales performance across stores, products, seasons and time periods.",
-  "Examine the relationship between inventory ageing, stock availability and sales performance.",
   "Forecast future sales and product demand with department, all-store and seasonal analysis using machine learning models."
 ];
 
@@ -45,7 +43,6 @@ const workflow = [
   "Data Cleaning",
   "Exploratory Data Analysis",
   "Feature Engineering",
-  "Relationship Analysis",
   "Machine Learning Model Development",
   "Model Evaluation",
   "Sales Forecasting",
@@ -91,11 +88,6 @@ const modules = [
     title: "Sales Analytics"
   },
   {
-    icon: GitBranch,
-    purpose: "Relationship analysis between inventory ageing, inventory availability, sales quantity and revenue using comparative visualizations.",
-    title: "Relationship Analytics"
-  },
-  {
     icon: LineChart,
     purpose: "Sales and demand forecasting across departments, all stores and seasons, with forecast comparison and model results.",
     title: "Forecast Analytics"
@@ -131,7 +123,6 @@ const developerDetails = [
 const highlights = [
   { description: "Interactive sales performance analysis across stores, products, seasons and time periods.", icon: BarChart3, title: "Sales Analytics" },
   { description: "Inventory availability, stock movement, ageing analysis and dead-stock identification.", icon: Boxes, title: "Inventory Analytics" },
-  { description: "Relationship analysis between inventory ageing, stock availability, sales quantity and revenue.", icon: GitBranch, title: "Relationship Analytics" },
   { description: "Sales and demand forecasting across departments, all stores and seasons with model evaluation and forecast comparison.", icon: LineChart, title: "Forecast Analytics" },
   { description: "Machine learning prediction workflow using evaluated regression models.", icon: Sparkles, title: "Machine Learning Prediction" },
   { description: "Interactive dashboard experience for analyzing retail sales, inventory and forecasting outcomes.", icon: BrainCircuit, title: "Interactive Business Intelligence Dashboard" }
@@ -142,7 +133,6 @@ const methodology = [
   "Data Cleaning",
   "Exploratory Data Analysis",
   "Feature Engineering",
-  "Relationship Analysis",
   "Machine Learning",
   "Model Evaluation",
   "Sales Forecasting",
@@ -154,7 +144,6 @@ const achievements = [
   "Developed a complete Sales and Inventory Analytics platform for Levi's.",
   "Built Inventory Analytics for stock availability, ageing and dead-stock identification.",
   "Developed Sales Analytics with revenue, seasonal and store-level analysis.",
-  "Performed Relationship Analytics between inventory ageing, stock availability, sales quantity and revenue.",
   "Compared multiple machine learning algorithms for forecasting.",
   "Selected Random Forest as the best Sales Forecast model.",
   "Selected XGBoost as the best Demand Forecast model.",
@@ -212,7 +201,7 @@ export default function AboutProjectPage() {
       <PageHeader
         eyebrow="MBA Business Analytics"
         title="Levi's Sales and Inventory Analytics"
-        description="An end-to-end Business Analytics platform developed to analyze sales performance, inventory availability, stock movement, relationship analysis, and machine learning-based sales and demand forecasting for strategic retail decision-making."
+        description="An end-to-end Business Analytics platform developed to analyze sales performance, inventory availability, stock movement, and machine learning-based sales and demand forecasting for strategic retail decision-making."
       />
 
       <PremiumCard>

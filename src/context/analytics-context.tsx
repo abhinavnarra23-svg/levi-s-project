@@ -27,7 +27,7 @@ type AnalyticsContextValue = {
 };
 
 const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
-const analyticsRoutes = new Set(["/business-insights", "/demand-forecasting", "/inventory-analytics", "/sales-analytics"]);
+const analyticsRoutes = new Set(["/demand-forecasting", "/inventory-analytics", "/sales-analytics"]);
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();

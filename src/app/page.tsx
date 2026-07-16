@@ -6,7 +6,6 @@ import {
   ArrowRight,
   BarChart3,
   Boxes,
-  BrainCircuit,
   CheckCircle2,
   Crown,
   Database,
@@ -15,7 +14,6 @@ import {
   LineChart,
   PackageCheck,
   PieChart,
-  SearchCheck,
   Sparkles,
   TrendingUp
 } from "lucide-react";
@@ -46,11 +44,6 @@ const objectives = [
     title: "Sales Performance",
     description: "Analyze revenue trends across products, stores, seasons and time.",
     icon: TrendingUp
-  },
-  {
-    title: "Relationship Analysis",
-    description: "Study the relationship between inventory ageing, stock availability and sales performance.",
-    icon: SearchCheck
   },
   {
     title: "Demand Forecasting",
@@ -103,11 +96,6 @@ const features = [
     title: "Forecast Analytics",
     icon: LineChart,
     items: ["Department forecasts", "All-store forecasts", "Season forecasts", "Model comparison"]
-  },
-  {
-    title: "Relationship Analytics",
-    icon: BrainCircuit,
-    items: ["Sales relationships", "Inventory relationships", "Ageing analysis", "Revenue patterns"]
   },
   {
     title: "Interactive Visualizations",

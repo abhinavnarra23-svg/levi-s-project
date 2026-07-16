@@ -1,7 +1,6 @@
 import {
   BarChart3,
   Boxes,
-  BrainCircuit,
   Home,
   Info,
   LineChart
@@ -24,11 +23,6 @@ export const navigationItems: NavigationItem[] = [
     title: "Sales Analytics",
     href: "/sales-analytics",
     icon: BarChart3
-  },
-  {
-    title: "Relationship Analytics",
-    href: "/business-insights",
-    icon: BrainCircuit
   },
   {
     title: "Forecast Analytics",
