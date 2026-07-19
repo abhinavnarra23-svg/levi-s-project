@@ -53,9 +53,9 @@ const workflow = [
 const modelGroups = [
   {
     models: [
-      { best: true, name: "Random Forest" },
+      { best: true, name: "Gradient Boosting Regressor" },
       { best: false, name: "XGBoost" },
-      { best: false, name: "Gradient Boosting" },
+      { best: false, name: "Random Forest" },
       { best: false, name: "Linear Regression" }
     ],
     title: "Sales Forecast Models"
@@ -105,7 +105,7 @@ const datasetOverview = [
   { label: "Products", value: "9,366" },
   { label: "Years Covered", value: "2021-2026" },
   { label: "Forecast Horizon", value: "12 Months" },
-  { label: "Sales Forecast Model", value: "Random Forest" },
+  { label: "Sales Forecast Model", value: "Gradient Boosting Regressor" },
   { label: "Demand Forecast Model", value: "XGBoost" }
 ];
 
@@ -115,7 +115,7 @@ const developerDetails = [
   { label: "University", value: "Anurag University" },
   { label: "Internship", value: "Business Analytics Intern, Sri Devi Group" },
   { label: "Major Project", value: "Levi's Sales and Inventory Analytics" },
-  { label: "Best Sales Forecast Model", value: "Random Forest" },
+  { label: "Best Sales Forecast Model", value: "Gradient Boosting Regressor" },
   { label: "Best Demand Forecast Model", value: "XGBoost" },
   { label: "Dataset", value: "Retail Sales & Inventory" }
 ];
@@ -145,7 +145,7 @@ const achievements = [
   "Built Inventory Analytics for stock availability, ageing and dead-stock identification.",
   "Developed Sales Analytics with revenue, seasonal and store-level analysis.",
   "Compared multiple machine learning algorithms for forecasting.",
-  "Selected Random Forest as the best Sales Forecast model.",
+  "Selected Gradient Boosting Regressor as the best Sales Forecast model.",
   "Selected XGBoost as the best Demand Forecast model.",
   "Generated 12-month Sales and Demand forecasts.",
   "Developed department-wise, all-store and season-wise forecast analysis.",

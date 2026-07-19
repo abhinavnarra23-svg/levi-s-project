@@ -125,10 +125,10 @@ const intelligenceCards = [
 ];
 
 const machineLearningModels = [
-  { badge: "Gold Badge", model: "Random Forest", role: "Sales Forecast", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200" },
-  { badge: "Gold Badge", model: "XGBoost", role: "Demand Forecast", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200" },
-  { badge: "Silver Badge", model: "Gradient Boosting", role: "Alternative Trained Model", tone: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200" },
-  { badge: "Bronze Badge", model: "Linear Regression", role: "Baseline Regression Model", tone: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-200" }
+  { badge: "Gold Badge", model: "Gradient Boosting Regressor", role: "Sales Forecast (Best Performing Model)", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200" },
+  { badge: "Gold Badge", model: "XGBoost", role: "Demand Forecast (Best Performing Model)", tone: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200" },
+  { badge: "Bronze Badge", model: "Random Forest", role: "Alternative Machine Learning Model", tone: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-200" },
+  { badge: "Trained Model", model: "Linear Regression", role: "Baseline Regression Model", tone: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200" }
 ];
 
 function SectionHeading({
@@ -258,7 +258,7 @@ export default function HomePage() {
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <div className="rounded-2xl bg-blue-50 px-3 py-2 dark:bg-blue-500/10">
                     <p className="text-[11px] font-bold uppercase tracking-wide text-blue-600">Sales</p>
-                    <p className="mt-1 text-sm font-black text-slate-950 dark:text-white">Random Forest</p>
+                    <p className="mt-1 text-sm font-black text-slate-950 dark:text-white">Gradient Boosting Regressor</p>
                   </div>
                   <div className="rounded-2xl bg-amber-50 px-3 py-2 dark:bg-amber-500/10">
                     <p className="text-[11px] font-bold uppercase tracking-wide text-amber-600">Demand</p>

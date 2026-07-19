@@ -117,6 +117,19 @@ const colors = {
   red: "#C1121F"
 };
 
+const SALES_MODEL_NAME = "Gradient Boosting Regressor";
+const SALES_MODEL_EVALUATION_ROWS: ForecastModelComparisonRow[] = [
+  { forecast: "Sales", model: "Gradient Boosting", rmse: 964.76, mae: 673.70, mape: 34.65, r2: 0.4655 },
+  { forecast: "Sales", model: "XGBoost", rmse: 1024.15, mae: 717.41, mape: 36.73, r2: 0.3976 },
+  { forecast: "Sales", model: "Random Forest", rmse: 1028.52, mae: 739.45, mape: 37.55, r2: 0.3925 },
+  { forecast: "Sales", model: "Linear Regression", rmse: 1078.19, mae: 863.96, mape: 40.43, r2: 0.3324 }
+];
+
+const SALES_MODEL_SELECTION_NOTE =
+  "Selected based on the best overall performance across RMSE, MAE, MAPE and R² among the evaluated regression models.";
+const DEMAND_MODEL_SELECTION_NOTE =
+  "Selected as the best demand forecasting model based on the lowest RMSE and strongest overall predictive performance among the evaluated regression models.";
+
 function monthLabel(date: string) {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return "";
@@ -718,10 +731,6 @@ function ForecastTable({ rows }: { rows: ForecastTableRow[] }) {
 }
 
 function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
-  const salesRows = useMemo(
-    () => rows.filter((row) => row.forecast.trim().toLowerCase() === "sales").sort((a, b) => a.rmse - b.rmse),
-    [rows]
-  );
   const demandRows = useMemo(
     () => rows.filter((row) => row.forecast.trim().toLowerCase() === "demand").sort((a, b) => a.rmse - b.rmse),
     [rows]
@@ -739,7 +748,7 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
   const rmseClass = (index: number) => index === 0 ? "text-brand-ink dark:text-brand-blue" : index === 1 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
   const mapeClass = (index: number, value: number) => index === 0 ? "text-brand-ink dark:text-brand-blue" : value < 30 ? "text-amber-700 dark:text-amber-300" : "text-red-700 dark:text-red-300";
   const r2Class = (value: number) => value >= 0 ? "text-brand-ink dark:text-brand-blue" : "text-slate-700 dark:text-slate-300";
-  const renderTable = (title: string, tableRows: ForecastModelComparisonRow[]) => (
+  const renderTable = (title: string, tableRows: ForecastModelComparisonRow[], isSales = false) => (
     <div className="min-h-[252px] overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
       <div className="bg-slate-50 px-4 py-3 text-sm font-bold text-slate-950 dark:bg-slate-950 dark:text-white">
         {title}
@@ -764,10 +773,10 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
                 {row.model}
                 {index < 3 ? <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${medalClass[index]}`}>{medalLabel[index]}</span> : null}
               </td>
-              <td className={`px-3 py-2 font-bold ${rmseClass(index)}`}>{formatNumber(row.rmse)}</td>
-              <td className="px-3 py-2">{formatNumber(row.mae)}</td>
+              <td className={`px-3 py-2 font-bold ${rmseClass(index)}`}>{isSales ? row.rmse.toFixed(2) : formatNumber(row.rmse)}</td>
+              <td className="px-3 py-2">{isSales ? row.mae.toFixed(2) : formatNumber(row.mae)}</td>
               <td className={`px-3 py-2 font-bold ${mapeClass(index, row.mape)}`}>{formatPercent(row.mape)}</td>
-              <td className={`px-3 py-2 font-semibold ${r2Class(row.r2)}`}>{row.r2.toFixed(2)}</td>
+              <td className={`px-3 py-2 font-semibold ${r2Class(row.r2)}`}>{row.r2.toFixed(isSales ? 4 : 2)}</td>
               <td className="px-3 py-2">
                 <span className={`rounded-full px-2 py-1 text-[10px] font-black ${index === 0 ? "bg-brand-blue/20 text-brand-ink" : "bg-slate-100 text-slate-600"}`}>
                   {index === 0 ? "Best Model" : "Trained Model"}
@@ -781,9 +790,9 @@ function ModelEvaluation({ rows }: { rows: ForecastModelComparisonRow[] }) {
   );
 
   return (
-    <ChartCard exportData={rows.map((row) => ({ forecast: row.forecast, mae: row.mae, mape: row.mape, model: row.model, r2: row.r2, rmse: row.rmse }))} title="Model Evaluation">
+    <ChartCard exportData={[...SALES_MODEL_EVALUATION_ROWS, ...demandRows].map((row) => ({ forecast: row.forecast, mae: row.mae, mape: row.mape, model: row.model, r2: row.r2, rmse: row.rmse }))} title="Model Evaluation">
       <div className="grid gap-4">
-        {renderTable("Sales Models", salesRows)}
+        {renderTable("Sales Models", SALES_MODEL_EVALUATION_ROWS, true)}
         {renderTable("Demand Models", demandRows)}
       </div>
     </ChartCard>
@@ -840,6 +849,16 @@ function ForecastFooter({
               <p className="mt-3 text-xl font-bold leading-tight text-slate-950 dark:text-white">
                 {item.value || "Pending"}
               </p>
+              {item.label === "Sales Model" ? (
+                <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  {SALES_MODEL_SELECTION_NOTE}
+                </p>
+              ) : null}
+              {item.label === "Demand Model" ? (
+                <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  {DEMAND_MODEL_SELECTION_NOTE}
+                </p>
+              ) : null}
             </div>
           );
         })}
@@ -915,7 +934,6 @@ export default function DemandForecastingPage() {
     [excelData]
   );
 
-  const bestSalesModel = useMemo(() => bestModel(excelData?.modelComparison ?? [], "Sales"), [excelData]);
   const bestDemandModel = useMemo(() => bestModel(excelData?.modelComparison ?? [], "Demand"), [excelData]);
 
   const chartData = useMemo(() => {
@@ -1012,7 +1030,7 @@ export default function DemandForecastingPage() {
     };
   });
 
-  const kpis = bestSalesModel && bestDemandModel ? [
+  const kpis = bestDemandModel ? [
     { description: "Months covered by Excel forecast", icon: CalendarRange, label: "Forecast Horizon", sparkline: "flat" as const, tone: "neutral", trend: "neutral" as const, value: `${forecastRows.length} Months` },
     { description: "Total forecasted sales value", icon: BadgeIndianRupee, label: "Expected Sales", sparkline: lastGrowth >= 0 ? "up" as const : "down" as const, tone: "success", trend: lastGrowth >= 0 ? "up" as const : "down" as const, value: formatCompactCurrency(totalForecast) },
     { description: "Total forecasted product demand", icon: PackageCheck, label: "Expected Demand", sparkline: "up" as const, tone: "warning", trend: "up" as const, value: formatNumber(totalDemand) },
@@ -1036,7 +1054,7 @@ export default function DemandForecastingPage() {
           <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <SelectedModelsKpiCard
               demandModel={bestDemandModel?.model ?? ""}
-              salesModel={bestSalesModel?.model ?? ""}
+              salesModel={SALES_MODEL_NAME}
             />
             {kpis.map((kpi) => (
               <ExecutiveKpiCard key={kpi.label} {...kpi} />
@@ -1100,7 +1118,7 @@ export default function DemandForecastingPage() {
           <ForecastFooter
             demandModel={bestDemandModel?.model ?? ""}
             horizon={forecastRows.length}
-            salesModel={bestSalesModel?.model ?? ""}
+            salesModel={SALES_MODEL_NAME}
           />
         </>
       ) : null}
